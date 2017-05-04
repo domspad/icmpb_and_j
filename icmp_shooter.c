@@ -9,7 +9,7 @@
 #include<string.h>
 #include<stdio.h>
 
-#define MAX_PEANTBTR_LEN 4000
+#define MAX_PEANTBTR_LEN 100
 
 #define ICMP_INFO_REPLY		16
 
@@ -50,7 +50,8 @@ int main(int argc, char ** argv){
     struct sockaddr_in ip4addr;
     struct peanutbutter mypb;
     ip4addr.sin_family = AF_INET;
-    ip4addr.sin_addr.s_addr = *destip;
+    int res = inet_aton(destip,&(ip4addr.sin_addr));
+    printf("success? %d\n", res);
 
     mypb.mycmp.type = ICMP_INFO_REPLY;
     mypb.mycmp.code = 0;
