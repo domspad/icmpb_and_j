@@ -78,11 +78,12 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
         struct icmphdr *icmp = (struct icmphdr *)(buffer + 34);
         printf("headerlen %d caplen %d", header->len, header->caplen);
         printf("type:%d code:%d checksum:%x seq:%d\n", icmp->type, icmp->code, icmp->checksum, icmp->un.echo.sequence);
-        for(int i = 50; i < header->caplen; i++){
-            char c = buffer[i];
-            /*if(c>=65 && c<=127)*/
-            printf("%x", c & 0xff);
-        }
+        /*for(int i = 50; i < header->caplen; i++){*/
+            /*char c = buffer[i];*/
+            /*[>if(c>=65 && c<=127)<]*/
+            /*printf("%c", c & 0xff);*/
+        /*}*/
+        printf("%s", &buffer[42]);
         printf("\n\n");
     }
 }
