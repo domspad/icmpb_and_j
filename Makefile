@@ -1,10 +1,12 @@
 
+CCFLAGS = -ggdb
+
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
-	CCFLAGS = -lpcap
+	CCFLAGS += -lpcap
 endif
 ifeq ($(UNAME_S), Linux)
-	CCFLAGS = -std=gnu99
+	CCFLAGS += -std=gnu99
 endif
 
 
