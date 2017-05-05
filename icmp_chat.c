@@ -10,6 +10,41 @@
 #include <net/if.h>
 #include <unistd.h>
 #include<netinet/ip_icmp.h>
+
+#define ETH_ALEN    6       /* Octets in one ethernet addr   */
+typedef unsigned short      u16;
+typedef u16         __be16;
+
+struct ethhdr {
+        unsigned char   h_dest[ETH_ALEN];   /* destination eth addr */
+            unsigned char   h_source[ETH_ALEN]; /* source ether addr    */
+                __be16      h_proto;        /* packet type ID field */
+} __attribute__((packed));
+
+#define ICMP_INFO_REPLY		16
+
+struct icmphdr
+{
+  u_int8_t type;		/* message type */
+  u_int8_t code;		/* type sub-code */
+  u_int16_t checksum;
+  union
+  {
+    struct
+    {
+      u_int16_t	id;
+      u_int16_t	sequence;
+    } echo;			/* echo datagram */
+    u_int32_t	gateway;	/* gateway address */
+    struct
+    {
+      u_int16_t	__unused;
+      u_int16_t	mtu;
+    } frag;			/* path mtu discovery */
+  } un;
+};
+
+
 char errbuf[100];
 
 static char my_ip_buff[20] =  { NULL };
@@ -78,12 +113,12 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
         struct icmphdr *icmp = (struct icmphdr *)(buffer + 34);
         printf("headerlen %d caplen %d", header->len, header->caplen);
         printf("type:%d code:%d checksum:%x seq:%d\n", icmp->type, icmp->code, icmp->checksum, icmp->un.echo.sequence);
+        printf("%s\n", &buffer[42]);
         /*for(int i = 50; i < header->caplen; i++){*/
             /*char c = buffer[i];*/
             /*[>if(c>=65 && c<=127)<]*/
-            /*printf("%c", c & 0xff);*/
+            /*printf("%x", c & 0xff);*/
         /*}*/
-        printf("%s", &buffer[42]);
         printf("\n\n");
     }
 }
