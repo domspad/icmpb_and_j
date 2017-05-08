@@ -3,7 +3,7 @@ Transfer files using ICMP packets. The world is your oyster.
 
 Receiver:
 ```
-./icmp_receive  # starts listerner... received files notified and put into directory
+./icmp_receive | base64 -d > outfile.txt  # starts listerner and outputs received messages to stdin
 ```
 
 Sender:
