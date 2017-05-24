@@ -37,7 +37,7 @@ int main(){
     }
     pcap_if_t *dev =  devicepois;
     for(;dev!=NULL; dev=dev->next){
-        if(!strcmp(dev->name, "wlan0"))
+        if(!strcmp(dev->name, "wlp3s0"))
             break;
     }
     printf("\nDevice is %s", dev->name);
@@ -57,7 +57,7 @@ char * get_my_ip(void){
     int fd;
     struct ifreq ifr;
 
-    char iface[] = "wlan0";
+    char iface[] = "wlp3s0";
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 
