@@ -15,35 +15,6 @@
 typedef unsigned short      u16;
 typedef u16         __be16;
 
-struct ethhdr {
-        unsigned char   h_dest[ETH_ALEN];   /* destination eth addr */
-            unsigned char   h_source[ETH_ALEN]; /* source ether addr    */
-                __be16      h_proto;        /* packet type ID field */
-} __attribute__((packed));
-
-#define ICMP_INFO_REPLY		16
-
-struct icmphdr
-{
-  u_int8_t type;		/* message type */
-  u_int8_t code;		/* type sub-code */
-  u_int16_t checksum;
-  union
-  {
-    struct
-    {
-      u_int16_t	id;
-      u_int16_t	sequence;
-    } echo;			/* echo datagram */
-    u_int32_t	gateway;	/* gateway address */
-    struct
-    {
-      u_int16_t	__unused;
-      u_int16_t	mtu;
-    } frag;			/* path mtu discovery */
-  } un;
-};
-
 
 char errbuf[100];
 

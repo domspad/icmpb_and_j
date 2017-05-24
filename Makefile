@@ -11,7 +11,7 @@ endif
 
 
 all:
-	gcc $(CCFLAGS) icmp_chat.c -o icmp_chat
+	gcc $(CCFLAGS) icmp_chat.c -o icmp_chat -lpcap
 	gcc icmp_shooter.c -o icmp_shooter
 
 clean:
