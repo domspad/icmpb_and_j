@@ -11,20 +11,42 @@
 
 #define MAX_PEANTBTR_LEN 100
 
+struct ouricmphdr
+{
+  u_int8_t type;		/* message type */
+  u_int8_t code;		/* type sub-code */
+  u_int16_t checksum;
+  union
+  {
+    struct
+    {
+      u_int16_t	id;
+      u_int16_t	sequence;
+    } echo;			/* echo datagram */
+    u_int32_t	gateway;	/* gateway address */
+    struct
+    {
+      u_int16_t	__unused;
+      u_int16_t	mtu;
+    } frag;			/* path mtu discovery */
+  } un;
+  u_int16_t peanut;
+};
+
 
 uint16_t ip_checksum(void* vdata,size_t length);
 
 struct peanutbutter {
-    struct icmphdr mycmp;
-    char secret_package[MAX_PEANTBTR_LEN - sizeof(struct icmphdr)];
+    struct ouricmphdr mycmp;
+    char secret_package[MAX_PEANTBTR_LEN - sizeof(struct ouricmphdr)];
 
 };
 
 
 int main(int argc, char ** argv){
 
-    char * destip = "10.0.0.5";
-    char * srcip = "10.0.0.4";
+    char * destip = "11.0.0.2";
+    char * srcip = "11.0.0.3";
 
     struct sockaddr_in ip4addr;
     struct peanutbutter mypb;
@@ -35,6 +57,7 @@ int main(int argc, char ** argv){
     mypb.mycmp.type = ICMP_INFO_REPLY;
     mypb.mycmp.code = 0;  //  ¯\_(ツ)_/¯
     mypb.mycmp.checksum=0;
+    mypb.mycmp.peanut=2;
     mypb.mycmp.un.echo.id = 0xbeef;
     mypb.mycmp.un.echo.sequence = 512;
     mypb.mycmp.un.gateway = 0xfeedface;
