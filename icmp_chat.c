@@ -16,6 +16,28 @@ typedef unsigned short      u16;
 typedef u16         __be16;
 
 
+struct ouricmphdr
+{
+  u_int8_t type;		/* message type */
+  u_int8_t code;		/* type sub-code */
+  u_int16_t checksum;
+  union
+  {
+    struct
+    {
+      u_int16_t	id;
+      u_int16_t	sequence;
+    } echo;			/* echo datagram */
+    u_int32_t	gateway;	/* gateway address */
+    struct
+    {
+      u_int16_t	__unused;
+      u_int16_t	mtu;
+    } frag;			/* path mtu discovery */
+  } un;
+  u_int16_t peanut;
+};
+
 char errbuf[100];
 
 static char my_ip_buff[20] =  { NULL };
@@ -28,6 +50,7 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
 int main(){
 
     char *my_ip = get_my_ip();
+    printf("My ip is: %s\n", my_ip);
     strcpy(my_ip_buff, my_ip);
 
     pcap_if_t *devicepois;
@@ -37,7 +60,7 @@ int main(){
     }
     pcap_if_t *dev =  devicepois;
     for(;dev!=NULL; dev=dev->next){
-        if(!strcmp(dev->name, "wlp3s0"))
+        if(!strcmp(dev->name, "dns0"))
             break;
     }
     printf("\nDevice is %s", dev->name);
@@ -57,7 +80,7 @@ char * get_my_ip(void){
     int fd;
     struct ifreq ifr;
 
-    char iface[] = "wlp3s0";
+    char iface[] = "dns0";
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -80,11 +103,12 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
     struct ip *iph = (struct ip *)(buffer + sizeof(struct ethhdr));
     int prot = iph->ip_p;
     char *dst_ip = inet_ntoa(iph->ip_dst);
-    if(!strcmp(dst_ip, my_ip_buff) && prot == 1) {
-        struct icmphdr *icmp = (struct icmphdr *)(buffer + 34);
-        printf("headerlen %d caplen %d", header->len, header->caplen);
-        printf("type:%d code:%d checksum:%x seq:%d\n", icmp->type, icmp->code, icmp->checksum, icmp->un.echo.sequence);
-        printf("%s\n", &buffer[42]);
+    struct ouricmphdr *icmp = (struct ouricmphdr *)(buffer+20);
+    /*printf("%s\n", &buffer);*/
+    if(icmp->peanut && icmp->peanut == 2){
+        /*printf("headerlen %d caplen %d\n", header->len, header->caplen);*/
+        /*printf("type:%d code:%d checksum:%x seq:%d\n", icmp->type, icmp->code, icmp->checksum, icmp->un.echo.sequence);*/
+        printf("%s\n", &buffer[32]);
         /*for(int i = 50; i < header->caplen; i++){*/
             /*char c = buffer[i];*/
             /*[>if(c>=65 && c<=127)<]*/
