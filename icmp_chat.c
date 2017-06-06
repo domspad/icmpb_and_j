@@ -40,7 +40,7 @@ struct ouricmphdr
 
 char errbuf[100];
 
-static char my_ip_buff[20] =  { NULL };
+static char my_ip_buff[20] =  { 0 };
 /*pcap_t *pcap_open_live(const char *device, int snaplen,*/
        /*int promisc, int to_ms, char *errbuf);*/
 char * get_my_ip(void);
@@ -108,12 +108,13 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
     if(icmp->peanut && icmp->peanut == 2){
         /*printf("headerlen %d caplen %d\n", header->len, header->caplen);*/
         /*printf("type:%d code:%d checksum:%x seq:%d\n", icmp->type, icmp->code, icmp->checksum, icmp->un.echo.sequence);*/
-        printf("%s\n", &buffer[32]);
+        printf("%s", &buffer[32]);
         /*for(int i = 50; i < header->caplen; i++){*/
             /*char c = buffer[i];*/
             /*[>if(c>=65 && c<=127)<]*/
             /*printf("%x", c & 0xff);*/
         /*}*/
-        printf("\n\n");
+        /*printf("\n\n");*/
+        buffer = NULL;
     }
 }
