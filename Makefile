@@ -12,7 +12,7 @@ endif
 
 all:
 	gcc $(CCFLAGS) icmp_chat.c -o icmp_chat -lpcap
-	gcc icmp_shooter.c -o icmp_shooter
+	gcc $(CCFLAGS) icmp_shooter.c -o icmp_shooter
 
 clean:
 	rm icmp_chat icmp_shooter
