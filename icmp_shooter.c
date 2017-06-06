@@ -52,7 +52,7 @@ uint16_t ip_checksum(void* vdata,size_t length);
 int main(int argc, char ** argv){
 
     struct sockaddr_in ip4addr;
-    char * destip = "11.0.0.1";
+    char * destip = "11.0.0.4";
     char * srcip = "11.0.0.2";
     ip4addr.sin_family = AF_INET;
     int res = inet_aton(destip,&(ip4addr.sin_addr));
@@ -85,12 +85,15 @@ int main(int argc, char ** argv){
 
         strncpy(pb.secret_package, buf, bytes_read);
         pb.mycmp.checksum=ip_checksum(&pb, sizeof(struct peanutbutter));
+        /*memset(buf + 320, 0, MAX_MSG_SIZE - bytes_read);*/
+        printf("%s", buf);
         int ret = sendto(socky, &pb, sizeof(pb), 0, (struct sockaddr *) &ip4addr, sizeof(struct sockaddr));
         if(ret == -1)
             printf("sendto error is: %s\n", strerror(errno));
         printf("BAMMMMMM\n");
         /*free(pb);*/
         /*pb = NULL;*/
+        memset(pb.secret_package, 0, MAX_MSG_SIZE);
     } 
     
     return 0;
