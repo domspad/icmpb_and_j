@@ -14,6 +14,7 @@
 #include<unistd.h>
 
 #define MAX_PEANTBTR_LEN 512
+#define MAX_FILENAME_SIZE 128
 
 struct ouricmphdr
 {
@@ -37,6 +38,7 @@ struct ouricmphdr
   u_int16_t peanut;
   u_int16_t num_pkt;
   u_int16_t total_pkts;
+  char filename[MAX_FILENAME_SIZE];
 };
 
 
@@ -62,15 +64,19 @@ int main(int argc, char ** argv){
     if(socky == -1)
         printf("socky error is: %s\n", strerror(errno));
 
-    // argv == icmp_shooter fiel_name
-    char * filename = argv[1];
+    // argv == icmp_shooter file_name
+    char* filename = argv[1];
+    char* dotp = strrchr(filename,'.');
+    char* nullp = strrchr(filename, NULL);
+    int ext_size = nullp - dotp;
+    int name_size = dotp - filename;
+
     // open file 
     int fd = open(filename, O_RDONLY);
     // Get the file size, yo!
     struct stat filep;
     fstat(fd, &filep);
     u_int16_t fsize = filep.st_size;
-   
    
     struct peanutbutter pb;
     /*pb = (struct peanutbutter*)malloc(sizeof(struct peanutbutter));*/
@@ -87,6 +93,12 @@ int main(int argc, char ** argv){
         total_pkts++;
     }
     pb.mycmp.total_pkts = total_pkts;
+    if(name_size + ext_size > MAX_FILENAME_SIZE){
+        strncpy(pb.mycmp.filename, filename, MAX_FILENAME_SIZE - ext_size);    
+        strcat(pb.mycmp.filename, dotp);
+    } else {
+        strcpy(pb.mycmp.filename, filename );
+    }
 
     // loop contents until less PACKETSIZE and shoot
     ssize_t bytes_read;
