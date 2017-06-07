@@ -110,6 +110,7 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
     int prot = iph->ip_p;
     char *dst_ip = inet_ntoa(iph->ip_dst);
     struct ouricmphdr *icmp = (struct ouricmphdr *)(buffer+20);
+    fprintf(stderr, "packet %d of %d packets", icmp->num_pkt, icmp->total_pkts);
     if(num_pkt != icmp->num_pkt){
         fprintf(stderr, "got wrong seq packet! Got %d instead of %d!", icmp->num_pkt, num_pkt);
         exit(1);
@@ -121,6 +122,7 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
     }
     if(icmp->num_pkt == icmp->total_pkts){
         rename("outfile.txt", icmp->filename);
+        printf("\a");
         fclose(fp);
         exit(0);
     }
