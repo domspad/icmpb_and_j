@@ -13,7 +13,7 @@
 #include<fcntl.h>
 #include<unistd.h>
 
-#define MAX_PEANTBTR_LEN 512
+#define MAX_PEANTBTR_LEN 1100
 #define MAX_FILENAME_SIZE 128
 
 struct ouricmphdr
@@ -75,9 +75,8 @@ int main(int argc, char ** argv){
     int fd = open(filename, O_RDONLY);
     // Get the file size, yo!
     struct stat filep;
-    fstat(fd, &filep);
-    u_int16_t fsize = filep.st_size;
-   
+    fstat(fd, &filep); 
+    u_int32_t fsize = filep.st_size; 
     struct peanutbutter pb;
     /*pb = (struct peanutbutter*)malloc(sizeof(struct peanutbutter));*/
     pb.mycmp.type = ICMP_INFO_REPLY;
@@ -108,9 +107,10 @@ int main(int argc, char ** argv){
         /*res = prep_pkt(pb, buf, bytes_read);*/
         pb.mycmp.num_pkt = num_pkt;
         strncpy(pb.secret_package, buf, bytes_read);
+        fprintf(stderr,"%d of %d\n", num_pkt, total_pkts);
         pb.mycmp.checksum=ip_checksum(&pb, sizeof(struct peanutbutter));
         /*memset(buf + 320, 0, MAX_MSG_SIZE - bytes_read);*/
-        printf("%s", buf);
+        /*printf("%s\n", pb.secret_package);*/
         int ret = sendto(socky, &pb, sizeof(pb), 0, (struct sockaddr *) &ip4addr, sizeof(struct sockaddr));
         if(ret == -1)
             printf("sendto error is: %s\n", strerror(errno));
@@ -120,7 +120,7 @@ int main(int argc, char ** argv){
         memset(pb.secret_package, 0, MAX_MSG_SIZE);
         num_pkt += 1;
     } 
-    
+    printf("\a");
     return 0;
 }
 
