@@ -15,6 +15,7 @@
 typedef unsigned short      u16;
 typedef u16         __be16;
 
+#define MAX_FILENAME_SIZE 128
 
 struct ouricmphdr
 {
@@ -36,9 +37,15 @@ struct ouricmphdr
     } frag;			/* path mtu discovery */
   } un;
   u_int16_t peanut;
+  u_int16_t num_pkt;
+  u_int16_t total_pkts;
+  char filename[MAX_FILENAME_SIZE];
 };
 
 char errbuf[100];
+
+u_int16_t num_pkt = 1;
+FILE *fp;
 
 static char my_ip_buff[20] =  { 0 };
 /*pcap_t *pcap_open_live(const char *device, int snaplen,*/
@@ -48,14 +55,14 @@ char * get_my_ip(void);
 void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buffer);
 
 int main(){
+    fp = fopen("outfile.txt","a");
 
     char *my_ip = get_my_ip();
-    printf("My ip is: %s\n", my_ip);
     strcpy(my_ip_buff, my_ip);
 
     pcap_if_t *devicepois;
     if(pcap_findalldevs(&devicepois, errbuf) == -1){
-        printf("Oh shoooot!!! No devicesss!");
+        fprintf(stderr,"Oh shoooot!!! No devicesss!");
         return -1;
     }
     pcap_if_t *dev =  devicepois;
@@ -63,10 +70,9 @@ int main(){
         if(!strcmp(dev->name, "dns0"))
             break;
     }
-    printf("\nDevice is %s", dev->name);
     pcap_t * handle = pcap_open_live(dev->name, 65000, 1, 0, errbuf);
     if(handle == NULL){
-        printf("Oops! Couldn't open the device %s\n", dev->name);
+        fprintf(stderr,"Oops! Couldn't open the device %s\n", dev->name);
         return -1;
     }
     /*int header_type = pcap_datalink(handle);*/
@@ -104,17 +110,20 @@ void processer(u_char *args, const struct pcap_pkthdr *header, const u_char *buf
     int prot = iph->ip_p;
     char *dst_ip = inet_ntoa(iph->ip_dst);
     struct ouricmphdr *icmp = (struct ouricmphdr *)(buffer+20);
-    /*printf("%s\n", &buffer);*/
+    fprintf(stderr, "packet %d of %d packets", icmp->num_pkt, icmp->total_pkts);
+    if(num_pkt != icmp->num_pkt){
+        fprintf(stderr, "got wrong seq packet! Got %d instead of %d!", icmp->num_pkt, num_pkt);
+        exit(1);
+    }
+    num_pkt++;
     if(icmp->peanut && icmp->peanut == 2){
-        /*printf("headerlen %d caplen %d\n", header->len, header->caplen);*/
-        /*printf("type:%d code:%d checksum:%x seq:%d\n", icmp->type, icmp->code, icmp->checksum, icmp->un.echo.sequence);*/
-        printf("%s", &buffer[32]);
-        /*for(int i = 50; i < header->caplen; i++){*/
-            /*char c = buffer[i];*/
-            /*[>if(c>=65 && c<=127)<]*/
-            /*printf("%x", c & 0xff);*/
-        /*}*/
-        /*printf("\n\n");*/
+        fprintf(fp, "%s", &buffer[36 + MAX_FILENAME_SIZE]);
         buffer = NULL;
+    }
+    if(icmp->num_pkt == icmp->total_pkts){
+        rename("outfile.txt", icmp->filename);
+        printf("\a");
+        fclose(fp);
+        exit(0);
     }
 }
