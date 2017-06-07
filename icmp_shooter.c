@@ -35,6 +35,8 @@ struct ouricmphdr
     } frag;			/* path mtu discovery */
   } un;
   u_int16_t peanut;
+  u_int16_t num_pkt;
+  u_int16_t total_pkts;
 };
 
 
@@ -52,14 +54,24 @@ uint16_t ip_checksum(void* vdata,size_t length);
 int main(int argc, char ** argv){
 
     struct sockaddr_in ip4addr;
-    char * destip = "11.0.0.4";
-    char * srcip = "11.0.0.2";
+    char * destip = "11.0.0.2";
+    char * srcip = "11.0.0.3";
     ip4addr.sin_family = AF_INET;
     int res = inet_aton(destip,&(ip4addr.sin_addr));
     int socky = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if(socky == -1)
         printf("socky error is: %s\n", strerror(errno));
 
+    // argv == icmp_shooter fiel_name
+    char * filename = argv[1];
+    // open file 
+    int fd = open(filename, O_RDONLY);
+    // Get the file size, yo!
+    struct stat filep;
+    fstat(fd, &filep);
+    u_int16_t fsize = filep.st_size;
+   
+   
     struct peanutbutter pb;
     /*pb = (struct peanutbutter*)malloc(sizeof(struct peanutbutter));*/
     pb.mycmp.type = ICMP_INFO_REPLY;
@@ -70,19 +82,19 @@ int main(int argc, char ** argv){
     pb.mycmp.un.echo.sequence = 512;
     pb.mycmp.un.gateway = 0xfeedface;
     pb.mycmp.un.frag.mtu = 0x0011;
-    
-    // argv == icmp_shooter fiel_name
-    char * filename = argv[1];
-    
-    // open file 
-    int fd = open(filename, O_RDONLY);
+    u_int16_t total_pkts = fsize / MAX_MSG_SIZE;
+    if(fsize % MAX_MSG_SIZE != 0){
+        total_pkts++;
+    }
+    pb.mycmp.total_pkts = total_pkts;
 
     // loop contents until less PACKETSIZE and shoot
     ssize_t bytes_read;
     char buf[MAX_MSG_SIZE];
+    u_int16_t num_pkt = 1;
     while((bytes_read = read(fd, buf, MAX_MSG_SIZE)) != 0){
         /*res = prep_pkt(pb, buf, bytes_read);*/
-
+        pb.mycmp.num_pkt = num_pkt;
         strncpy(pb.secret_package, buf, bytes_read);
         pb.mycmp.checksum=ip_checksum(&pb, sizeof(struct peanutbutter));
         /*memset(buf + 320, 0, MAX_MSG_SIZE - bytes_read);*/
@@ -94,6 +106,7 @@ int main(int argc, char ** argv){
         /*free(pb);*/
         /*pb = NULL;*/
         memset(pb.secret_package, 0, MAX_MSG_SIZE);
+        num_pkt += 1;
     } 
     
     return 0;
